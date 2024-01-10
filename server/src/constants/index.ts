@@ -15,9 +15,17 @@ export const USER_MESSAGE = {
 	loginSuccessful: 'Login successful',
 	firstNameIsTooShort: 'First name must be at least 2 characters long',
 	lastNameIsTooShort: 'Last name must be at least 2 characters long',
-	addressIsTooShort: 'Address must be at least 2 characters long'
+	addressIsTooShort: 'Address must be at least 2 characters long',
+	unableToHashPassword: 'Unable to hash password',
+	passwordResetSuccessfully: 'Password reset successfully'
 };
 
 export const AUTH_MESSAGE = {
 	authFailed: 'Authentication failed'
+};
+
+export const OTP_MESSAGE = {
+	otpSuccessful: 'OTP code verified successsfully',
+	invalidOTP: 'Invalid OTP',
+	sessionExpired: 'Session expired'
 };

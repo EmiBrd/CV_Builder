@@ -9,7 +9,7 @@ import userModel from '../model/userModel';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import ENV from '../config/config';
-import { USER_MESSAGE } from '../constants';
+import { OTP_MESSAGE, USER_MESSAGE } from '../constants';
 
 export const register = async (req: Request, res: Response) => {
 	const { username, password, email, firstName, lastName, mobile, address, profileImage } = req.body;
@@ -78,7 +78,7 @@ export const login = async (req: Request, res: Response) => {
 	}
 };
 
-export async function getUser(req: Request, res: Response) {
+export const getUser = async (req: Request, res: Response) => {
 	const { username } = req.params;
 	try {
 		if (!username) return res.status(501).send({ error: USER_MESSAGE.usernameIsInvalid });
@@ -90,9 +90,9 @@ export async function getUser(req: Request, res: Response) {
 	} catch (error) {
 		return res.status(404).send({ error: USER_MESSAGE.userDataNotFound });
 	}
-}
+};
 
-export async function updateUser(req: Request, res: Response) {
+export const updateUser = async (req: Request, res: Response) => {
 	try {
 		// const id = req.query.id;
 		console.log('req.body in updateUser');
@@ -112,4 +112,31 @@ export async function updateUser(req: Request, res: Response) {
 	} catch (error) {
 		return res.status(401).send({ error });
 	}
-}
+};
+
+export const resetPassword = async (req: Request, res: Response) => {
+	if (!req.app.locals.resetSession) return res.status(440).send({ error: OTP_MESSAGE.sessionExpired });
+
+	try {
+		const { username, password } = req.body;
+		try {
+			const user = await userModel.findOne({ username });
+			if (!user) return res.status(404).send({ error: USER_MESSAGE.userNotFound });
+
+			console.log('Here1');
+			const hashedPassword = await bcrypt.hash(password, 10);
+			console.log(hashedPassword);
+
+			await userModel.updateOne({ username: user.username }, { password: hashedPassword });
+			console.log('Here3');
+
+			req.app.locals.resetSession = false; // reset session
+
+			return res.status(200).send({ msg: USER_MESSAGE.passwordResetSuccessfully });
+		} catch (error) {
+			return res.status(500).send({ error: USER_MESSAGE.unableToHashPassword });
+		}
+	} catch (error) {
+		return res.status(401).send({ error });
+	}
+};
