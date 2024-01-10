@@ -1,5 +1,5 @@
 
 server/node_modules
-server/src/config/config.ts
+server/src/config
 
 client/node_modules
