@@ -2,6 +2,7 @@ import { Request, Response, Router } from 'express';
 import { auth, variablesForOTP, verifyUser } from '../middleware/auth';
 import { getUser, login, register, resetPassword, updateUser } from '../controller/userController';
 import { generateOTP, verifyOTP } from '../controller/otpController';
+import { confirmEmailRegistration } from '../controller/mailController';
 
 const router = Router();
 
@@ -11,6 +12,7 @@ router.route('/registerMail').post((req: Request, res: Response) => res.json('re
 
 /** Login */
 router.route('/login').post(login);
+router.route('/confirmEmailRegistration').post(confirmEmailRegistration);
 
 /** Reset password */
 router.route('/resetPassword').put(verifyUser, resetPassword);

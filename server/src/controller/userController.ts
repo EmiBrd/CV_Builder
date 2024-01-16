@@ -115,7 +115,7 @@ export const updateUser = async (req: Request, res: Response) => {
 };
 
 export const resetPassword = async (req: Request, res: Response) => {
-	if (!req.app.locals.resetSession) return res.status(440).send({ error: OTP_MESSAGE.sessionExpired });
+	if (!req.app.locals.isActiveSession) return res.status(440).send({ error: OTP_MESSAGE.sessionExpired });
 
 	try {
 		const { username, password } = req.body;
@@ -123,14 +123,12 @@ export const resetPassword = async (req: Request, res: Response) => {
 			const user = await userModel.findOne({ username });
 			if (!user) return res.status(404).send({ error: USER_MESSAGE.userNotFound });
 
-			console.log('Here1');
 			const hashedPassword = await bcrypt.hash(password, 10);
 			console.log(hashedPassword);
 
 			await userModel.updateOne({ username: user.username }, { password: hashedPassword });
-			console.log('Here3');
 
-			req.app.locals.resetSession = false; // reset session
+			req.app.locals.isActiveSession = false; // stop session
 
 			return res.status(200).send({ msg: USER_MESSAGE.passwordResetSuccessfully });
 		} catch (error) {
