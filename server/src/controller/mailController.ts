@@ -28,7 +28,6 @@ export const confirmEmailRegistration = async (req: Request, res: Response) => {
 		to: [ ENV.EMAIL ],
 		subject: 'OTP code to confirm registration',
 		text: 'Hello',
-		// html: `<h2>${email}, otpCode=${otpCode}</h2>`
 		html: `Dear ${username},
 
 		<br></br>
