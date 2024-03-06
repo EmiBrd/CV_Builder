@@ -1,7 +1,5 @@
-// import { Request, Response } from 'express'
 import nodemailer from 'nodemailer'
 import ENV from '../config/config'
-// import { generateOTP } from './otpController'
 import { BASE_URL, EMAIL_MESSAGE } from '../constants'
 
 export interface UsernameEmailPasswordI {
@@ -10,16 +8,11 @@ export interface UsernameEmailPasswordI {
   password: string
 }
 
-// export interface UsernameAndOTPI {
-//   email: string
-//   generatedOtpCode: string
-// }
-
 const nodeConfig = {
   service: 'gmail',
   host: 'smtp.gmail.com',
   port: 587,
-  secure: false, // true for 465, false for other ports
+  secure: false /** true for 465, false for other ports */,
   auth: {
     user: ENV.EMAIL,
     pass: ENV.PASSWORD,
@@ -58,7 +51,7 @@ export const sendEmailToConfirmRegisteredAccount = async (
 		<br>Best regards,</br>
 		<br>Emi, Junior Frontend Developer</br>
 		CV Builder`,
-    // cc: [ 'doarTestez@ceva.com' ]
+    /** cc: [ 'doarTestez@ceva.com' ] */
   }
 
   const sentMail = await transporter.sendMail(mailOptions)
@@ -69,9 +62,6 @@ export const sendEmailContainingOTP = async (
   email: string,
   generatedOtpCode: string
 ) => {
-  // const { email, generatedOtpCode } = emailAndOTP
-  // const generatedOtpCode = await generateOTP()
-
   const mailOptions = {
     from: {
       name: 'CV_Builder',
@@ -98,15 +88,9 @@ export const sendEmailContainingOTP = async (
 		<br>Thank you,</br>
 		<br>Emi, Junior Frontend Developer</br>
 		CV Builder`,
-    // cc: [ 'doarTestez@ceva.com' ]
+    /** cc: [ 'doarTestez@ceva.com' ] */
   }
 
-  // try {
-  //   transporter.sendMail(mailOptions)
-  //   return res.status(200).send({ msg: 'Email was sent' })
-  // } catch (error) {
-  //   return res.status(500).send({ error })
-  // }
   const sentMail = await transporter.sendMail(mailOptions)
   if (!sentMail) throw EMAIL_MESSAGE.confirmationOTPFailed
 }

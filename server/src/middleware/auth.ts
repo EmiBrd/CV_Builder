@@ -34,7 +34,7 @@ export const verifyUser = async (
   try {
     const { username } = req.method == 'GET' ? req.query : req.body
 
-    // check the user existance
+    /** check the user existance */
     const userExist = await userModel.findOne({ username })
     if (!userExist)
       return res.status(404).send({ error: USER_MESSAGE.userNotFound })
@@ -43,23 +43,3 @@ export const verifyUser = async (
     return res.status(404).send({ error: AUTH_MESSAGE.authFailed })
   }
 }
-
-// export const variablesForOTP = async (
-//   req: Request,
-//   res: Response,
-//   next: NextFunction
-// ) => {
-//   const user = req.user
-
-//   const otpCode = ''
-//   const isActiveSession = false
-
-//   // Update user in the database with the generated OTP and isActiveSession
-//   await userModel.updateOne(
-//     { username: user.username },
-//     { $set: { otpCode, isActiveSession } }
-//     // { $set: { otpCode, isActiveSession } }
-//   )
-
-//   next()
-// }

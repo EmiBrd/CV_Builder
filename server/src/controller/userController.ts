@@ -30,12 +30,12 @@ export const register = async (req: Request, res: Response) => {
 
   try {
     if (!validateUsername(username)) throw USER_MESSAGE.usernameIsTooShort
-    // if username exists throw exception
+    /** if username exists throw exception */
     const usernameExists = await userModel.findOne({ username })
     if (usernameExists) throw USER_MESSAGE.usernameExists
 
     if (!validateEmail(email)) throw USER_MESSAGE.emailIsInvalid
-    // if email exists throw exception
+    /** if email exists throw exception */
     const emailExists = await userModel.findOne({ email })
     if (emailExists) throw USER_MESSAGE.emailExists
 
@@ -165,8 +165,7 @@ export const deleteUser = async (req: Request, res: Response) => {
 export const confirmRegisteredAccount = async (req: Request, res: Response) => {
   try {
     const { username } = req.params
-
-    // check the user existance
+    /** check the user existance */
     const userExist = await userModel.findOne({ username })
     if (!userExist)
       return res.status(404).send({ error: USER_MESSAGE.userNotFound })
@@ -174,10 +173,8 @@ export const confirmRegisteredAccount = async (req: Request, res: Response) => {
     if (userExist.isAccountConfirmed)
       res.status(101).send({ info: 'User already confirmed' })
 
-    // await userModel.updateOne({ isAccountConfirmed: true })
     await userModel.updateOne(
       { username: userExist.username },
-      // { isAccountConfirmed: true }
       { $set: { isAccountConfirmed: true } }
     )
 
@@ -202,9 +199,9 @@ export const sendOTPViaEmail = async (
 
       await userModel.updateOne(
         { email: user.email },
-        // { otpCode: generatedOtpCode }, // store the OTP code
-        // { isActiveSession: false } // the session to reset the password is stoped
-        { $set: { otpCode: generatedOtpCode, isActiveSession: false } }
+        {
+          $set: { otpCode: generatedOtpCode, isActiveSession: false },
+        } /** the session to reset the password is stoped */
       )
 
       await sendEmailContainingOTP(email, generatedOtpCode)
@@ -234,13 +231,12 @@ export const resetPassword = async (req: Request, res: Response) => {
         return res.status(440).send({ error: OTP_MESSAGE.sessionExpired })
 
       const hashedPassword = await bcrypt.hash(password, 10)
-      // console.log(hashedPassword)
 
       await userModel.updateOne(
         { username: user.username },
-        // { password: hashedPassword },
-        // { isActiveSession: false } // stop session
-        { $set: { password: hashedPassword, isActiveSession: false } } // the session to reset the password is stoped
+        {
+          $set: { password: hashedPassword, isActiveSession: false },
+        } /** the session to reset the password is stoped */
       )
 
       return res
@@ -253,34 +249,3 @@ export const resetPassword = async (req: Request, res: Response) => {
     return res.status(401).send({ error })
   }
 }
-// export const resetPassword = async (req: Request, res: Response) => {
-//   if (!req.app.locals.isActiveSession)
-//     return res.status(440).send({ error: OTP_MESSAGE.sessionExpired })
-
-//   try {
-//     const { username, password } = req.body
-//     try {
-//       const user = await userModel.findOne({ username })
-//       if (!user)
-//         return res.status(404).send({ error: USER_MESSAGE.userNotFound })
-
-//       const hashedPassword = await bcrypt.hash(password, 10)
-//       // console.log(hashedPassword)
-
-//       await userModel.updateOne(
-//         { username: user.username },
-//         { password: hashedPassword }
-//       )
-
-//       req.app.locals.isActiveSession = false // stop session
-
-//       return res
-//         .status(200)
-//         .send({ msg: USER_MESSAGE.passwordResetSuccessfully })
-//     } catch (error) {
-//       return res.status(500).send({ error: USER_MESSAGE.unableToHashPassword })
-//     }
-//   } catch (error) {
-//     return res.status(401).send({ error })
-//   }
-// }
