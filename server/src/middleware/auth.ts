@@ -44,28 +44,22 @@ export const verifyUser = async (
   }
 }
 
-export const variablesForOTP = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const user = req.user
+// export const variablesForOTP = async (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ) => {
+//   const user = req.user
 
-  const otpCode = ''
-  const isActiveSession = false
+//   const otpCode = ''
+//   const isActiveSession = false
 
-  // Update user in the database with the generated OTP and isActiveSession
-  await userModel.updateOne(
-    { username: user.username },
-    { $set: { otpCode, isActiveSession } }
-  )
+//   // Update user in the database with the generated OTP and isActiveSession
+//   await userModel.updateOne(
+//     { username: user.username },
+//     { $set: { otpCode, isActiveSession } }
+//     // { $set: { otpCode, isActiveSession } }
+//   )
 
-  next()
-}
-// export function variablesForOTP(req: Request, res: Response, next: NextFunction) {
-// 	req.app.locals = {
-// 		otpCode: '',
-// 		isActiveSession: false
-// 	};
-// 	next();
+//   next()
 // }

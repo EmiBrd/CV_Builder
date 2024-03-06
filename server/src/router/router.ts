@@ -7,6 +7,7 @@ import {
   login,
   register,
   resetPassword,
+  sendOTPViaEmail,
   updateUser,
 } from '../controller/userController'
 import { verifyOTP } from '../controller/otpController'
@@ -23,7 +24,8 @@ router
 router.route('/login').post(login) // Nr 3
 
 /** Reset password */
-router.route('/resetPassword').put(verifyUser, resetPassword)
+// router.route('/resetPassword').put(verifyUser, resetPassword) // 6
+router.route('/resetPassword').put(resetPassword) // 6
 
 /** User */
 router.route('/user/:username').get(getUser)
@@ -32,6 +34,8 @@ router.route('/userDelete').delete(auth, deleteUser)
 
 /** OTP */
 // router.route('/generateOTP').get(verifyUser, variablesForOTP, generateOTP);
-router.route('/verifyOTP').get(verifyUser, verifyOTP)
+router.route('/sendOTPViaEmail').post(sendOTPViaEmail) // 4
+// router.route('/verifyOTP').get(verifyUser, verifyOTP) // 5
+router.route('/verifyOTP').put(verifyOTP) // 5
 
 export default router

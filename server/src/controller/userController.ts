@@ -9,8 +9,12 @@ import userModel from '../model/userModel'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import ENV from '../config/config'
-import { OTP_MESSAGE, USER_MESSAGE } from '../constants'
-import { sendEmailToConfirmRegisteredAccount } from './mailController'
+import { EMAIL_MESSAGE, OTP_MESSAGE, USER_MESSAGE } from '../constants'
+import {
+  sendEmailContainingOTP,
+  sendEmailToConfirmRegisteredAccount,
+} from './mailController'
+import { generateOTP } from './otpController'
 
 export const register = async (req: Request, res: Response) => {
   const {
@@ -170,7 +174,12 @@ export const confirmRegisteredAccount = async (req: Request, res: Response) => {
     if (userExist.isAccountConfirmed)
       res.status(101).send({ info: 'User already confirmed' })
 
-    await userModel.updateOne({ isAccountConfirmed: true })
+    // await userModel.updateOne({ isAccountConfirmed: true })
+    await userModel.updateOne(
+      { username: userExist.username },
+      // { isAccountConfirmed: true }
+      { $set: { isAccountConfirmed: true } }
+    )
 
     return res.status(200).send({ msg: USER_MESSAGE.userDataUpdated })
   } catch (error) {
@@ -178,10 +187,38 @@ export const confirmRegisteredAccount = async (req: Request, res: Response) => {
   }
 }
 
-export const resetPassword = async (req: Request, res: Response) => {
-  if (!req.app.locals.isActiveSession)
-    return res.status(440).send({ error: OTP_MESSAGE.sessionExpired })
+export const sendOTPViaEmail = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const { email } = req.body
+    try {
+      const user = await userModel.findOne({ email })
+      if (!user)
+        return res.status(404).send({ error: USER_MESSAGE.userNotFound })
 
+      const generatedOtpCode = await generateOTP()
+
+      await userModel.updateOne(
+        { email: user.email },
+        // { otpCode: generatedOtpCode }, // store the OTP code
+        // { isActiveSession: false } // the session to reset the password is stoped
+        { $set: { otpCode: generatedOtpCode, isActiveSession: false } }
+      )
+
+      await sendEmailContainingOTP(email, generatedOtpCode)
+
+      return res.status(200).send({ msg: EMAIL_MESSAGE.otpSentSuccessfully })
+    } catch (error) {
+      return res.status(500).send({ error: EMAIL_MESSAGE.otpSentFailed })
+    }
+  } catch (error) {
+    return res.status(401).send({ error })
+  }
+}
+
+export const resetPassword = async (req: Request, res: Response) => {
   try {
     const { username, password } = req.body
     try {
@@ -189,15 +226,22 @@ export const resetPassword = async (req: Request, res: Response) => {
       if (!user)
         return res.status(404).send({ error: USER_MESSAGE.userNotFound })
 
+      console.log(`in resetPassword`)
+      console.log(`user.username=${user.username}`)
+      console.log(`user.isActiveSession=${user.isActiveSession}`)
+
+      if (!user.isActiveSession)
+        return res.status(440).send({ error: OTP_MESSAGE.sessionExpired })
+
       const hashedPassword = await bcrypt.hash(password, 10)
-      console.log(hashedPassword)
+      // console.log(hashedPassword)
 
       await userModel.updateOne(
         { username: user.username },
-        { password: hashedPassword }
+        // { password: hashedPassword },
+        // { isActiveSession: false } // stop session
+        { $set: { password: hashedPassword, isActiveSession: false } } // the session to reset the password is stoped
       )
-
-      req.app.locals.isActiveSession = false // stop session
 
       return res
         .status(200)
@@ -209,3 +253,34 @@ export const resetPassword = async (req: Request, res: Response) => {
     return res.status(401).send({ error })
   }
 }
+// export const resetPassword = async (req: Request, res: Response) => {
+//   if (!req.app.locals.isActiveSession)
+//     return res.status(440).send({ error: OTP_MESSAGE.sessionExpired })
+
+//   try {
+//     const { username, password } = req.body
+//     try {
+//       const user = await userModel.findOne({ username })
+//       if (!user)
+//         return res.status(404).send({ error: USER_MESSAGE.userNotFound })
+
+//       const hashedPassword = await bcrypt.hash(password, 10)
+//       // console.log(hashedPassword)
+
+//       await userModel.updateOne(
+//         { username: user.username },
+//         { password: hashedPassword }
+//       )
+
+//       req.app.locals.isActiveSession = false // stop session
+
+//       return res
+//         .status(200)
+//         .send({ msg: USER_MESSAGE.passwordResetSuccessfully })
+//     } catch (error) {
+//       return res.status(500).send({ error: USER_MESSAGE.unableToHashPassword })
+//     }
+//   } catch (error) {
+//     return res.status(401).send({ error })
+//   }
+// }

@@ -33,6 +33,9 @@ export const OTP_MESSAGE = {
 
 export const EMAIL_MESSAGE = {
   confirmationEmailFailed: 'Could not send confirmation email',
+  confirmationOTPFailed: 'Could not send OTP code via email',
+  otpSentSuccessfully: 'Otp sent successfully',
+  otpSentFailed: 'Failed to send OTP code',
 }
 
 export const BASE_URL = 'http://localhost:5000/api'
